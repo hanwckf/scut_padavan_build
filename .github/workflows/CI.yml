@@ -63,6 +63,10 @@ jobs:
       - name: Clone source
         run: |
           git clone --depth=1 $src_git
+          cd $repo_name
+          GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null)"
+          echo "image_suffix=${GIT_VERSION}_$(date +%Y%m%d)" >> $GITHUB_ENV
+          echo "image_name=images_${GIT_VERSION}" >> $GITHUB_ENV
       - name: Run shellcheck
         run: |
           cd $repo_name
@@ -90,14 +94,9 @@ jobs:
       - name: Create archive
         if: ${{ success() }}
         run: |
-          cd /opt/rt-n56u
-          GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null)"
-          image_suffix="${GIT_VERSION}_$(date +%Y%m%d)"
-          image_name=images_${image_suffix}
           cd /opt/images
           for m in $targets; do zip ${m}_${image_suffix}.zip $m.trx; done
           7z a -mx=9 ${image_name}.7z *.zip
-          echo "image_name=${image_name}" >> $GITHUB_ENV
       - name: Upload images to Artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@v2.2.1
