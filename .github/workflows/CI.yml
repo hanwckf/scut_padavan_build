@@ -66,7 +66,7 @@ jobs:
           cd $repo_name
           GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null)"
           echo "image_suffix=${GIT_VERSION}_$(date +%Y%m%d)" >> $GITHUB_ENV
-          echo "image_name=images_${GIT_VERSION}" >> $GITHUB_ENV
+          echo "image_name=images_${build_variant}_${GIT_VERSION}" >> $GITHUB_ENV
       - name: Run shellcheck
         run: |
           cd $repo_name
