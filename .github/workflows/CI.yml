@@ -102,4 +102,4 @@ jobs:
         uses: actions/upload-artifact@v2.2.1
         with:
           name: ${{ env.image_name }}
-          path: /opt/images/${image_name}.7z
+          path: /opt/images/${{ env.image_name }}.7z
