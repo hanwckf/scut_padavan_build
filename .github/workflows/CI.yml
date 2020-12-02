@@ -62,7 +62,7 @@ jobs:
           sudo apt install libtool-bin gperf python-docutils autopoint gettext zip
       - name: Clone source
         run: |
-          git clone --depth=1 $src_git
+          git clone --depth=1 $src_git $repo_name
           cd $repo_name
           GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null)"
           echo "image_suffix=${GIT_VERSION}_$(date +%Y%m%d)" >> $GITHUB_ENV
@@ -70,7 +70,7 @@ jobs:
       - name: Run shellcheck
         run: |
           cd $repo_name
-          if [ -f ./trunk/tools/shellcheck.sh]; then sh ./trunk/tools/shellcheck.sh; fi
+          if [ -f ./trunk/tools/shellcheck.sh ]; then sh ./trunk/tools/shellcheck.sh; fi
       - name: Prepare toolchain
         run: |
           cd $repo_name
