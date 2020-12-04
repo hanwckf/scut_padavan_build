@@ -7,9 +7,8 @@ on:
 
 env:
   src_git: https://github.com/hanwckf/rt-n56u.git
-  repo_name: rt-n56u
-  toolchain_pkg: mipsel-linux-uclibc.tar.xz
-  toolchain_url: https://github.com/hanwckf/padavan-toolchain/releases/download/v1.1
+  build_dir: /opt/rt-n56u
+  images_dir: /opt/images
   ENABLED_CFG: |
     CONFIG_FIRMWARE_INCLUDE_TCPDUMP
     CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT
@@ -62,39 +61,37 @@ jobs:
           sudo apt install libtool-bin gperf python-docutils autopoint gettext zip
       - name: Clone source
         run: |
-          git clone --depth=1 $src_git $repo_name
-          cd $repo_name
+          git clone --depth=1 $src_git $build_dir
+          cd $build_dir
           GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null)"
           echo "image_suffix=${GIT_VERSION}_$(date +%Y%m%d)" >> $GITHUB_ENV
           echo "image_name=images_${build_variant}_${GIT_VERSION}" >> $GITHUB_ENV
       - name: Run shellcheck
         run: |
-          cd $repo_name
+          cd $build_dir
           if [ -f ./trunk/tools/shellcheck.sh ]; then sh ./trunk/tools/shellcheck.sh; fi
       - name: Prepare toolchain
         run: |
-          cd $repo_name
-          mkdir -p /opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x && mkdir -p /opt/images/
-          rm -rf toolchain-mipsel/ && mv -f * .[^.]* /opt/rt-n56u
-          curl -LO ${toolchain_url}/${toolchain_pkg}
-          tar -xf $toolchain_pkg -C /opt/rt-n56u/toolchain-mipsel/toolchain-3.4.x
+          cd $build_dir/toolchain-mipsel
+          sh dl_toolchain.sh
       - name: Modify configs
         run: |
-          cd /opt/rt-n56u/trunk/configs/templates
+          cd $build_dir/trunk/configs/templates
           for m in $targets; do if [ -f $m.config ]; then \
           for n in $ENABLED_CFG; do sed -i "/${n}/c${n}=y" $m.config; done; \
           for n in $DISABLED_CFG; do sed -i "/${n}/c${n}=n" $m.config; done; \
           fi; done
       - name: Start build
         run: |
-          cd /opt/rt-n56u/trunk
+          mkdir -p $images_dir
+          cd $build_dir/trunk
           for m in $targets; do fakeroot ./build_firmware_ci $m; \
-          if [ $? = 0 ]; then cp -f images/*.trx /opt/images/$m.trx; else exit 1; fi; \
+          if [ $? = 0 ]; then cp -f images/*.trx $images_dir/$m.trx; else exit 1; fi; \
           ./clear_tree_simple >/dev/null 2>&1; done
       - name: Create archive
         if: ${{ success() }}
         run: |
-          cd /opt/images
+          cd $images_dir
           for m in $targets; do zip ${m}_${image_suffix}.zip $m.trx; done
           7z a -mx=9 ${image_name}.7z *.zip
       - name: Upload images to Artifact
@@ -102,4 +99,4 @@ jobs:
         uses: actions/upload-artifact@v2.2.1
         with:
           name: ${{ env.image_name }}
-          path: /opt/images/${{ env.image_name }}.7z
+          path: ${{ env.images_dir }}/${{ env.image_name }}.7z
