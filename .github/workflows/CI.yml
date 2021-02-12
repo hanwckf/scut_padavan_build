@@ -55,16 +55,21 @@ jobs:
           - build_variant: "mt7621-usb-2"
             targets: "JCG-836PRO-5.0 JCG-AC860M-5.0 JCG-Y2-5.0 DIR-882-5.0 MI-R3G B70"
     steps:
+      - uses: actions/checkout@v2
       - name: Prepare environment
         run: |
           sudo apt update
           sudo apt install libtool-bin gperf python-docutils autopoint gettext zip
+          mkdir -p $images_dir
+          cp -f ./ReleaseNote.txt $images_dir
       - name: Clone source
         run: |
           git clone --depth=1 $src_git $build_dir
           cd $build_dir
           GIT_VERSION="$(git rev-parse --short=7 HEAD 2>/dev/null)"
-          echo "image_suffix=${GIT_VERSION}_$(date +%Y%m%d)" >> $GITHUB_ENV
+          build_date="$(date +%Y%m%d)"
+          echo "build_date=${build_date}" >> $GITHUB_ENV
+          echo "image_suffix=${GIT_VERSION}_${build_date}" >> $GITHUB_ENV
           echo "image_name=images_${build_variant}_${GIT_VERSION}" >> $GITHUB_ENV
       - name: Run shellcheck
         run: |
@@ -83,7 +88,6 @@ jobs:
           fi; done
       - name: Start build
         run: |
-          mkdir -p $images_dir
           cd $build_dir/trunk
           for m in $targets; do fakeroot ./build_firmware_ci $m; \
           if [ $? = 0 ]; then cp -f images/*.trx $images_dir/$m.trx; else exit 1; fi; \
@@ -91,8 +95,10 @@ jobs:
       - name: Create archive
         if: ${{ success() }}
         run: |
+          echo "Build Date: ${build_date}" >> ${images_dir}/ReleaseNote.txt
+          cd $build_dir && git log -1 |tee -a ${images_dir}/ReleaseNote.txt
           cd $images_dir
-          for m in $targets; do zip ${m}_${image_suffix}.zip $m.trx; done
+          for m in $targets; do zip ${m}_${image_suffix}.zip $m.trx ReleaseNote.txt; done
           7z a -mx=9 ${image_name}.7z *.zip
       - name: Upload images to Artifact
         if: ${{ success() }}

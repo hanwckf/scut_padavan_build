@@ -1,0 +1,2 @@
+Source: https://github.com/hanwckf/rt-n56u
+CI: https://github.com/hanwckf/scut_padavan_build/actions
