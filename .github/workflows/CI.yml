@@ -95,7 +95,7 @@ jobs:
       - name: Create archive
         if: ${{ success() }}
         run: |
-          echo "Build Date: ${build_date}" >> ${images_dir}/ReleaseNote.txt
+          echo -e "Build Date: ${build_date}\n" >> ${images_dir}/ReleaseNote.txt
           cd $build_dir && git log -1 |tee -a ${images_dir}/ReleaseNote.txt
           cd $images_dir
           for m in $targets; do zip ${m}_${image_suffix}.zip $m.trx ReleaseNote.txt; done
