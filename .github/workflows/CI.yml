@@ -52,7 +52,7 @@ jobs:
             targets: "K2P DIR-878 RM2100 CR660x"
           - build_variant: "mt7621-usb-1"
             targets: "MSG1500 WR1200JS E8820V2 NEWIFI3 MI-R3G B70"
-          - build-variant: "mt7621-usb-2"
+          - build_variant: "mt7621-usb-2"
             targets: "JCG-836PRO JCG-AC860M JCG-Y2 DIR-882 MI-R3P"
     steps:
       - uses: actions/checkout@v2
