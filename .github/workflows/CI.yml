@@ -32,6 +32,7 @@ env:
     CONFIG_FIRMWARE_INCLUDE_FRPC
     CONFIG_FIRMWARE_INCLUDE_FRPS
     CONFIG_FIRMWARE_INCLUDE_TUNSAFE
+    CONFIG_FIRMWARE_INCLUDE_WIREGUARD
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -49,11 +50,11 @@ jobs:
           - build_variant: "mt7628"
             targets: "360P2 HC5861B HC5761A HC5661A MI-NANO"
           - build_variant: "mt7621"
-            targets: "K2P DIR-878 RM2100 CR660x"
+            targets: "K2P DIR-878 RM2100 CR660x JCG-Q20"
           - build_variant: "mt7621-usb-1"
             targets: "MSG1500 WR1200JS E8820V2 NEWIFI3 MI-R3G B70"
           - build_variant: "mt7621-usb-2"
-            targets: "JCG-836PRO JCG-AC860M JCG-Y2 DIR-882 MI-R3P"
+            targets: "JCG-836PRO JCG-AC860M JCG-Y2 DIR-882"
     steps:
       - uses: actions/checkout@v2
       - name: Prepare environment
